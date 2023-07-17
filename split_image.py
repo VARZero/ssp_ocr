@@ -38,6 +38,8 @@ def splitImg(textstart, txtimg, startpoint, endpoint, size, rolCount, colCount):
         for f in range(rolCount):
             splitOne = txtimg[startpoint[1]+(size[1]*d):endpoint[1]+(size[1]*d), startpoint[0]+(size[0]*f):endpoint[0]+(size[0]*f)]
             rsSo = cv2.resize(splitOne, dsize=(28,28), interpolation=cv2.INTER_LINEAR)
+            rsSo = cv2.rotate(rsSo, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            rsSo = cv2.flip(rsSo, 0)
             cv2.imwrite('dataset/'+str(textstart)+'/'+str(f)+'.png', rsSo)
         textstart += 1
 
