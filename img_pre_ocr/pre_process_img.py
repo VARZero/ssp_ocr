@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 txtimg = cv2.imread('exm1.png', cv2.IMREAD_UNCHANGED)
+a = txtimg
 txtimg = txtimg[:,:,3]
 
 imgHalfHgt = int(txtimg.shape[0] / 2)
@@ -16,12 +17,25 @@ for b in cnt:
     x, y, w, h = cv2.boundingRect(b)
     PreBoxArea.append([x, 0, x+w, y+h])
 
-nowX, nowW = 0
-for PbA in PreBoxArea:
-    if len(BoxArea) == 0:
-        BoxArea.append(PbA)
-        nowX = PbA[0]
-        nowW = PbA[2]
-        continue
-    for bA in BoxArea:
-        if bA
+print(PreBoxArea)
+
+PreBoxArea.sort(key=lambda x:x[0])
+
+print(PreBoxArea)
+
+for pBA in PreBoxArea:
+    BoxArea.append(pBA)
+    for b in BoxArea[:-1]:
+        if pBA[0] > b[2]: continue
+        elif pBA[2] < b[0]: break
+
+        BoxArea.pop()
+        if pBA[0] <= b[0]: b[0] = pBA[0]
+        elif pBA[2] >= b[2]: b[2] = pBA[2]
+
+charIMG = list()
+for b in BoxArea:
+    cImg = txtimg[0:b[3], b[0]:b[2]]
+    cv2.imshow("",cImg)
+    cv2.waitKey(0)
+cv2.destroyAllWindows()
