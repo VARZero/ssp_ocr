@@ -33,6 +33,12 @@ for pBA in PreBoxArea:
         if pBA[0] <= b[0]: b[0] = pBA[0]
         elif pBA[2] >= b[2]: b[2] = pBA[2]
 
+n = 1
+for b in BoxArea:
+    a = cv2.rectangle(a,(b[0],b[1]),(b[2],b[3]),(0,25*n,0), 3) # green
+    cv2.imshow('e', a)
+    n+=1
+
 charIMG = list()
 for b in BoxArea:
     cImg = txtimg[0:b[3], b[0]:b[2]]
