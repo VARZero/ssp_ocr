@@ -23,17 +23,32 @@
     <script type="text/javascript">
 let imgElement = document.getElementById('imageSrc');
 let inputElement = document.getElementById('fileInput');
+let cnt;
+let chars = Array(); let charImgs = Array();
 
 inputElement.addEventListener('change', (e) => {
     imgElement.src = URL.createObjectURL(e.target.files[0]);
 }, false);
 
 imgElement.onload = function() {
-    let mat = cv.imread(imgElement, cv.IMREAD_UNCHANGED);
-    let 
+    let txtimg = cv.imread(imgElement, cv.IMREAD_UNCHANGED);
+    let rgbaP = new cv.MatVector();
 
-    cv.imshow('canvasOutput', mat);
-    mat.delete();
+    cv.split(txtimg, rgbaP);
+    let alphaChannel = rgbaP.get(3);
+
+    let thImg = new cv.Mat();
+    cv.threshold(alphaChannel, thImg, 1, 255, 0);
+    
+    cnt = new cv.MatVector(); let hiec = new cv.Mat();
+    cv.findContours(thImg, cnt, hiec, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+    console.log(cnt.get(0))
+    //for ()
+
+    cv.imshow('canvasOutput', thImg);
+
+    txtimg.delete(); rgbaP.delete(); alphaChannel.delete();
 };
 
 var Module = {
@@ -41,6 +56,11 @@ var Module = {
         document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
     }
 };
+
+const model = await tf.loadLayersModel()
+for (let i = 0; i < charImgs.length; i++){
+    chars.push(String.fromCharCode(Number(model.predict(charImgs[i]))+32));
+}
     </script>
 </body>
 </html>
