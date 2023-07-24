@@ -43,8 +43,27 @@ imgElement.onload = function() {
     cnt = new cv.MatVector(); let hiec = new cv.Mat();
     cv.findContours(thImg, cnt, hiec, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-    console.log(cnt.get(0))
-    //for ()
+    let pre_rects = Array(); let rects = Array();
+    for(let c = 0; c < cnt.size(); c++){
+        let rect = cv.boundingRect(cnt.get(c));
+        pre_rects.push(rect);
+    }
+    pre_rects.sort((a,b) => {return a.x - b.x})
+    console.log(pre_rects);
+
+    for(prt of pre_rects){
+        rects.push(prt);
+        for(rt of rects.splice(rects.length-1)){
+            if(prt.x > (rt.x+rt.width)) continue;
+            else if((prt.x+prt.width) < rt.x) break;
+            console.log(rt)
+            //rects.pop();
+            if(prt.x <= rt.x) rt.x = prt.x;
+            else if((prt.x+prt.width) >= (rt.x+rt.width)){ rt.x = prt.x; rt.width = prt.width; }
+        }
+        이거 수정
+    }
+    console.log(rects);
 
     cv.imshow('canvasOutput', thImg);
 
@@ -57,10 +76,10 @@ var Module = {
     }
 };
 
-const model = await tf.loadLayersModel()
+/*const model = await tf.loadLayersModel()
 for (let i = 0; i < charImgs.length; i++){
     chars.push(String.fromCharCode(Number(model.predict(charImgs[i]))+32));
-}
+}*/
     </script>
 </body>
 </html>
