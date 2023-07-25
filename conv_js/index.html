@@ -51,23 +51,43 @@ imgElement.onload = function() {
     pre_rects.sort((a,b) => {return a.x - b.x})
     console.log(pre_rects);
 
-    for(prt of pre_rects){
+    for (prt of pre_rects){
         rects.push(prt);
-        for(rt of rects.splice(rects.length-1)){
-            if(prt.x > (rt.x+rt.width)) continue;
-            else if((prt.x+prt.width) < rt.x) break;
-            console.log(rt)
-            //rects.pop();
-            if(prt.x <= rt.x) rt.x = prt.x;
-            else if((prt.x+prt.width) >= (rt.x+rt.width)){ rt.x = prt.x; rt.width = prt.width; }
+        for (let b = 0; b < rects.length-1; b++){
+            let nowBox = rects[b];
+            if (prt.x > (nowBox.x+nowBox.width)) continue;
+            else if ((prt.x+prt.width) < nowBox.x) break;
+
+            rects.pop();
+            if (prt.x <= nowBox.x) rects[b].x = prt.x;
+            else if ((prt.x+prt.width) >= (nowBox.x+nowBox.width)){
+                rects[b].x = prt.x;
+                rects[b].width = prt.width;
+            }
         }
-        이거 수정
     }
     console.log(rects);
+
+    for (let i = 0; i < rects.length; i++){
+        charOneImg = new cv.Mat();
+        charOneImg = thImg.roi(rects[i]);
+        charImgs.push(charOneImg);
+        console.log(charOneImg.type());
+        console.log(charOneImg.ucharPtr(charOneImg.rows, charOneImg.cols));
+    }
+
+    color = new cv.Scalar(255, 0, 0);
+
+    for (e = 0; e < rects.length; e++){
+        rects[e].width += rects[e].x; rects[e].height += rects[e].y;
+        rects[e].y = 0/;
+        cv.drawContours(thImg, rects[e], 0, color, 1, 8, hiec, 100);
+    }
 
     cv.imshow('canvasOutput', thImg);
 
     txtimg.delete(); rgbaP.delete(); alphaChannel.delete();
+    thImg.delete(); cnt.delete(); hiec.delete();
 };
 
 var Module = {
