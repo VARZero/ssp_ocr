@@ -48,7 +48,6 @@ imgElement.onload = function() {
         pre_rects.push(rect);
     }
     pre_rects.sort((a,b) => {return a.x - b.x})
-    console.log(pre_rects);
 
     for (prt of pre_rects){
         rects.push(prt);
@@ -65,18 +64,43 @@ imgElement.onload = function() {
             }
         }
     }
-    console.log(rects);
 
     for (let i = 0; i < rects.length; i++){
+        blackImg = new cv.Mat()
+
         charOneImg = new cv.Mat();
         let area = new cv.Rect(rects[i].x, 0, rects[i].x+rects[i].width, rects[i].y+rects[i].height);
         charOneImg = thImg.roi(area);
-        charImgs.push(charOneImg);
-        console.log(charOneImg.type());
-        console.log(charOneImg.ucharPtr(charOneImg.rows, charOneImg.cols));
-    }
+        
+        let wth = parseInt(28 * (rects[i].width/(rects[i].y+rects[i].height)));
+        let borderL = parseInt((28-wth)/2);
+        let borderR = (wth % 2) ? borderL+1 : borderL ;
 
+        let dsize = new cv.Size(wth, 28);
+        cv.resize(charOneImg, charOneImg, dsize, 0, 0, cv.INTER_AREA);
+        let blk = new cv.Scalar(0);
+        cv.copyMakeBorder(charOneImg, charOneImg, 0,0, borderL, borderR, cv.BORDER_CONSTANT, blk)
+
+        
+
+        let Img_array = [];
+        for (let i = 0; i < charOneImg.rows; i++) {
+            let colArray = [];
+            for (let j = 0; j < charOneImg.cols; j++) {
+                let pixel = [];
+                for (let k = 0; k < charOneImg.channels(); k++) {
+                    pixel.push(charOneImg.ucharPtr(i, j)[k]);
+                }
+                colArray.push(pixel);
+            }
+            Img_array.push(colArray);
+        }
+
+        charImgs.push(Img_array);
+        charOneImg.delete();
+    }
     
+    console.log(charImgs);
 
     cv.imshow('canvasOutput', thImg);
 
