@@ -23,7 +23,6 @@
     <script type="text/javascript">
 let imgElement = document.getElementById('imageSrc');
 let inputElement = document.getElementById('fileInput');
-let cnt;
 let chars = Array(); let charImgs = Array();
 
 inputElement.addEventListener('change', (e) => {
@@ -40,7 +39,7 @@ imgElement.onload = function() {
     let thImg = new cv.Mat();
     cv.threshold(alphaChannel, thImg, 1, 255, 0);
     
-    cnt = new cv.MatVector(); let hiec = new cv.Mat();
+    let cnt = new cv.MatVector(); let hiec = new cv.Mat();
     cv.findContours(thImg, cnt, hiec, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
     let pre_rects = Array(); let rects = Array();
@@ -70,19 +69,14 @@ imgElement.onload = function() {
 
     for (let i = 0; i < rects.length; i++){
         charOneImg = new cv.Mat();
-        charOneImg = thImg.roi(rects[i]);
+        let area = new cv.Rect(rects[i].x, 0, rects[i].x+rects[i].width, rects[i].y+rects[i].height);
+        charOneImg = thImg.roi(area);
         charImgs.push(charOneImg);
         console.log(charOneImg.type());
         console.log(charOneImg.ucharPtr(charOneImg.rows, charOneImg.cols));
     }
 
-    color = new cv.Scalar(255, 0, 0);
-
-    for (e = 0; e < rects.length; e++){
-        rects[e].width += rects[e].x; rects[e].height += rects[e].y;
-        rects[e].y = 0/;
-        cv.drawContours(thImg, rects[e], 0, color, 1, 8, hiec, 100);
-    }
+    
 
     cv.imshow('canvasOutput', thImg);
 
