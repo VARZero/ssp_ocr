@@ -78,22 +78,26 @@ imgElement.onload = function() {
 
         let dsize = new cv.Size(wth, 28);
         cv.resize(charOneImg, charOneImg, dsize, 0, 0, cv.INTER_AREA);
-        let blk = new cv.Scalar(0);
-        cv.copyMakeBorder(charOneImg, charOneImg, 0,0, borderL, borderR, cv.BORDER_CONSTANT, blk)
-
-        
+        if (wth < 28){
+            let blk = new cv.Scalar(0);
+            cv.copyMakeBorder(charOneImg, charOneImg, 0,0, borderL, borderR, cv.BORDER_CONSTANT, blk)
+        }
+        else{
+            let rdsize = new cv.Size(28, 28);
+            cv.resize(charOneImg, charOneImg, rdsize, 0, 0, cv.INTER_AREA);
+        }
 
         let Img_array = [];
-        for (let i = 0; i < charOneImg.rows; i++) {
-            let colArray = [];
-            for (let j = 0; j < charOneImg.cols; j++) {
+        for (let i = 0; i < charOneImg.cols; i++) {
+            let rowArray = [];
+            for (let j = 0; j < charOneImg.rows; j++) {
                 let pixel = [];
                 for (let k = 0; k < charOneImg.channels(); k++) {
                     pixel.push(charOneImg.ucharPtr(i, j)[k]);
                 }
-                colArray.push(pixel);
+                rowArray.push(pixel);
             }
-            Img_array.push(colArray);
+            Img_array.push(rowArray);
         }
 
         charImgs.push(Img_array);
