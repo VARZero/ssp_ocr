@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script async src="js/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-    <script src="js//tf.min.js"></script>
+    <script src="js/tf.min.js"></script>
 </head>
 <body>
     <h2>Hello OpenCV.js</h2>
@@ -93,14 +93,15 @@ imgElement.onload = function() {
             for (let j = 0; j < charOneImg.rows; j++) {
                 let pixel = [];
                 for (let k = 0; k < charOneImg.channels(); k++) {
-                    pixel.push(charOneImg.ucharPtr(i, j)[k]);
+                    pixel.push(((charOneImg.ucharPtr(i, j)[k])/255));
                 }
                 rowArray.push(pixel);
             }
             Img_array.push(rowArray);
+            box = []; box.push(Img_array);
         }
 
-        charImgs.push(Img_array);
+        charImgs.push(box);
         charOneImg.delete();
     }
     
@@ -110,6 +111,9 @@ imgElement.onload = function() {
 
     txtimg.delete(); rgbaP.delete(); alphaChannel.delete();
     thImg.delete(); cnt.delete(); hiec.delete();
+
+    predictChar(charImgs)
+
 };
 
 var Module = {
@@ -118,10 +122,14 @@ var Module = {
     }
 };
 
-/*const model = await tf.loadLayersModel()
-for (let i = 0; i < charImgs.length; i++){
-    chars.push(String.fromCharCode(Number(model.predict(charImgs[i]))+32));
-}*/
+async function predictChar(Imgs){
+    const model = await tf.loadLayersModel('./convjs/model.json')
+    for (let i = 0; i < Imgs.length; i++){
+        chars.push(String.fromCharCode(Number(model.predict(charImgs[i]))+32));
+    }
+
+    console.log(chars)
+}
     </script>
 </body>
 </html>
