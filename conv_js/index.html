@@ -88,16 +88,16 @@ imgElement.onload = function() {
         }
 
         let Img_array = [];
-        for (let i = 0; i < charOneImg.cols; i++) {
-            let rowArray = [];
-            for (let j = 0; j < charOneImg.rows; j++) {
+        for (let i = 0; i < charOneImg.rows; i++) {
+            let colArray = [];
+            for (let j = 0; j < charOneImg.cols; j++) {
                 let pixel = [];
                 for (let k = 0; k < charOneImg.channels(); k++) {
-                    pixel.push(((charOneImg.ucharPtr(i, j)[k])/255));
+                    pixel.push((charOneImg.ucharPtr(j, i)[k])/255);
                 }
-                rowArray.push(pixel);
+                colArray.push(pixel[0]);
             }
-            Img_array.push(rowArray);
+            Img_array.push(colArray);
             box = []; box.push(Img_array);
         }
 
@@ -125,7 +125,15 @@ var Module = {
 async function predictChar(Imgs){
     const model = await tf.loadLayersModel('./convjs/model.json')
     for (let i = 0; i < Imgs.length; i++){
-        chars.push(String.fromCharCode(Number(model.predict(charImgs[i]))+32));
+        console.log(Imgs[i]);
+        var inp = tf.tensor(Imgs[i]);
+        console.log(inp);
+        p = model.predict(inp).arraySync()[0];
+        console.log(p)
+        k = Math.max.apply(null, p); console.log(k);
+        charV = p.indexOf(k);
+        console.log(charV);
+        chars.push(String.fromCharCode(Number(charV)+32));
     }
 
     console.log(chars)
