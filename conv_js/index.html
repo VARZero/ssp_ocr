@@ -65,11 +65,17 @@ imgElement.onload = function() {
         }
     }
 
+    let spaceLen = [];
+
+    let chiImg = [];
+
     for (let i = 0; i < rects.length; i++){
+        spaceLen.push([rects[i].width, rects[i].x+rects[i].width]);
+
         blackImg = new cv.Mat()
 
         charOneImg = new cv.Mat();
-        let area = new cv.Rect(rects[i].x, 0, rects[i].x+rects[i].width, rects[i].y+rects[i].height);
+        let area = new cv.Rect(rects[i].x, 0, rects[i].width, rects[i].y+rects[i].height);
         charOneImg = thImg.roi(area);
         
         let wth = parseInt(28 * (rects[i].width/(rects[i].y+rects[i].height)));
@@ -77,43 +83,62 @@ imgElement.onload = function() {
         let borderR = (wth % 2) ? borderL+1 : borderL ;
 
         let dsize = new cv.Size(wth, 28);
-        cv.resize(charOneImg, charOneImg, dsize, 0, 0, cv.INTER_AREA);
+        cv.resize(charOneImg, charOneImg, dsize, 0, 0, cv.INTER_LINEAR);
         if (wth < 28){
             let blk = new cv.Scalar(0);
             cv.copyMakeBorder(charOneImg, charOneImg, 0,0, borderL, borderR, cv.BORDER_CONSTANT, blk)
         }
         else{
             let rdsize = new cv.Size(28, 28);
-            cv.resize(charOneImg, charOneImg, rdsize, 0, 0, cv.INTER_AREA);
+            cv.resize(charOneImg, charOneImg, rdsize, 0, 0, cv.INTER_LINEAR);
         }
+        console.log(String(wth)+" "+String(borderL)+" "+String(borderR))
+
 
         let Img_array = [];
+        let Img_arrayi = [];
         for (let i = 0; i < charOneImg.rows; i++) {
             let colArray = [];
+            let coliArray = [];
             for (let j = 0; j < charOneImg.cols; j++) {
-                let pixel = [];
+                let pixel = []; let pixeli = [];
                 for (let k = 0; k < charOneImg.channels(); k++) {
                     pixel.push((charOneImg.ucharPtr(j, i)[k])/255);
+                    pixeli.push((charOneImg.ucharPtr(j, i)[k] == 0) ? 0 : 1);
                 }
                 colArray.push(pixel[0]);
+                coliArray.push(pixeli[0]);
             }
             Img_array.push(colArray);
             box = []; box.push(Img_array);
+            Img_arrayi.push(coliArray);
+            boxi = []; boxi.push(Img_arrayi)
         }
 
         charImgs.push(box);
+        chiImg.push(boxi);
         charOneImg.delete();
     }
     
-    console.log(charImgs);
+    console.log(chiImg);
 
     cv.imshow('canvasOutput', thImg);
 
     txtimg.delete(); rgbaP.delete(); alphaChannel.delete();
     thImg.delete(); cnt.delete(); hiec.delete();
 
-    predictChar(charImgs)
+    var smax = 0; var spaceIndex = [];
+    for(s = 1; s < spaceLen.length; s++){
+        smax = (smax > spaceLen[i-1][0])? spaceLen[i-1][0] : smax;
+    }
+    smax = (smax > spaceLen[spaceLen.length-1][0])? spaceLen[spaceLen.length-1][0] : smax;
+    spaceLen.pop();
+    for(spL of spaceLen){
+        if(spL[1] > smax){spaceIndex.push(true); return;}
+        spaceIndex.push(false);
+    }
 
+    predictChar(charImgs, spaceIndex)
 };
 
 var Module = {
@@ -122,18 +147,18 @@ var Module = {
     }
 };
 
-async function predictChar(Imgs){
+async function predictChar(Imgs, space){
     const model = await tf.loadLayersModel('./convjs/model.json')
     for (let i = 0; i < Imgs.length; i++){
         console.log(Imgs[i]);
         var inp = tf.tensor(Imgs[i]);
-        console.log(inp);
         p = model.predict(inp).arraySync()[0];
-        console.log(p)
         k = Math.max.apply(null, p); console.log(k);
         charV = p.indexOf(k);
-        console.log(charV);
         chars.push(String.fromCharCode(Number(charV)+32));
+        if(space[i] == true){
+            chars.push(String.fromCharCode(32));
+        }
     }
 
     console.log(chars)
